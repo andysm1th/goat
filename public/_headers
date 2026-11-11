@@ -1,0 +1,23 @@
+# Cloudflare Pages / Workers static assets.
+
+# The embeddable player. Other sites load it with <script type="module">, which
+# needs CORS; its name is fixed, so browsers revalidate it on every load.
+/text-goat.js
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Frames, manifests and music: fetched cross-origin by text-goat.js on other sites.
+/animation/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+/animation/manifest.json
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/animation/techno.json
+  ! Cache-Control
+  Cache-Control: no-cache

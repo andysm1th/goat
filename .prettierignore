@@ -1,0 +1,3 @@
+# Written by tools: the converter and loop cutter, and pnpm.
+public/animation/
+pnpm-lock.yaml

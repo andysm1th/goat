@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "file": "techno-b74ba6737659.mp3",
+  "bytes": 1250264,
+  "title": "Techno",
+  "artist": "Monume",
+  "bpm": 125,
+  "beatsPerBar": 4,
+  "bars": 32,
+  "loopStart": 0.5,
+  "loopLength": 61.44,
+  "downbeat": 0.01,
+  "source": {
+    "firstBar": 32,
+    "start": 61.568163265306126
+  }
+}

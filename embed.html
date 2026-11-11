@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Embed the goat</title>
+    <meta
+      name="description"
+      content="Put the running text goat on any web page with one script tag."
+    />
+    <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <style>
+      body {
+        margin: 0;
+        font:
+          18px/1.6 Georgia,
+          serif;
+        color: #0b0b0b;
+        background: #e6e6e6;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 32px 20px 96px;
+      }
+      h1,
+      h2 {
+        font:
+          500 40px/1.1 Helvetica,
+          Arial,
+          sans-serif;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        margin-top: 2.2em;
+        font-size: 24px;
+        letter-spacing: 0;
+      }
+      a {
+        color: inherit;
+      }
+      code {
+        font-size: 15px;
+        letter-spacing: 0;
+      }
+      .hero {
+        height: 70vh;
+      }
+      .card {
+        border-radius: 8px;
+        --goat-background: #f5f5f5;
+        --goat-foreground: #f73928;
+      }
+      dt {
+        margin-top: 0.9em;
+      }
+      dd {
+        margin: 0 0 0 1.25em;
+      }
+
+      /* Deliberately unkind to embedded content. The goats render in shadow
+         roots, so none of this reaches them; the page's own code blocks and
+         copy button below override it by class. */
+      * {
+        letter-spacing: 0.08em;
+      }
+      pre,
+      span {
+        font-size: 40px;
+        line-height: 3;
+        text-transform: lowercase;
+      }
+      button {
+        padding: 40px;
+        border: 8px dashed hotpink;
+        font-size: 40px;
+      }
+
+      .snippet {
+        position: relative;
+        margin: 1.5em 0;
+        border-radius: 8px;
+        color: #e6e6e6;
+        background: #0b0b0b;
+      }
+      .snippet pre {
+        margin: 0;
+        padding: 20px;
+        overflow-x: auto;
+        font-size: 15px;
+        line-height: 1.6;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .snippet.is-copyable pre {
+        padding-top: 56px;
+      }
+      .snippet .copy {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        height: 32px;
+        padding: 0 12px;
+        border: 1px solid #e6e6e6;
+        border-radius: 4px;
+        color: #0b0b0b;
+        background: #f5f5f5;
+        font:
+          500 14px/1 ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .snippet .copy:hover {
+        color: #f5f5f5;
+        background: #0b0b0b;
+      }
+      .snippet .copy:focus-visible {
+        outline: 2px solid #f5f5f5;
+        outline-offset: 2px;
+      }
+    </style>
+    <script type="module" src="/src/element/index.ts"></script>
+  </head>
+  <body>
+    <!-- Sized by the page: fills whatever box it is given, goat centred. -->
+    <text-goat class="hero"></text-goat>
+    <main>
+      <p><a href="%BASE_URL%">← Back to the goat</a></p>
+      <h1>Embed the goat</h1>
+      <p>Put it on any page with these two lines:</p>
+      <div class="snippet" id="snippet">
+        <pre><code>&lt;script type="module" src="%BASE_URL%text-goat.js"&gt;&lt;/script&gt;
+&lt;text-goat&gt;&lt;/text-goat&gt;</code></pre>
+        <button type="button" class="copy" hidden>Copy</button>
+      </div>
+      <p>
+        Left unsized, it is full width at 16:9. Give it a size, like the 70vh
+        box at the top of this page, and it fills it: the goat stays centred and
+        the lines and floor run on to the edges. It stops drawing while scrolled
+        out of view or in a background tab.
+      </p>
+      <p>
+        It renders in a shadow root, so your page's styles cannot reach it. This
+        page sets wide letter-spacing on everything and dashed hot-pink borders
+        on every button, and neither goat shows a trace.
+      </p>
+
+      <h2>Options</h2>
+      <p>Attributes on <code>&lt;text-goat&gt;</code>, all optional:</p>
+      <dl>
+        <dt><code>fit="contain"</code></dt>
+        <dd>
+          Show the whole 16:9 frame, letterboxed. The default,
+          <code>fill</code>, covers the box.
+        </dd>
+        <dt><code>controls="pause"</code> or <code>"none"</code></dt>
+        <dd>A pause button only, or no buttons at all.</dd>
+        <dt><code>paused</code>, <code>techno</code>, <code>muted</code></dt>
+        <dd>
+          Start paused, in Techno, or in Techno without sound. Also properties,
+          alongside <code>play()</code> and <code>pause()</code>.
+        </dd>
+        <dt><code>text="…"</code></dt>
+        <dd>The word or phrase Techno runs along the lines.</dd>
+        <dt><code>label="…"</code></dt>
+        <dd>What screen readers announce in place of the animation.</dd>
+        <dt><code>frame-rate="30"</code></dt>
+        <dd>At most this many frames a second. The default is 60.</dd>
+        <dt><code>src="…"</code></dt>
+        <dd>
+          Your own copy of the frames: the folder holding
+          <code>manifest.json</code>. Without it they load from beside
+          <code>text-goat.js</code>.
+        </dd>
+      </dl>
+      <p>
+        Colours are custom properties on the element:
+        <code>--goat-background</code>, <code>--goat-foreground</code>,
+        <code>--goat-accent</code> (the goat in Techno),
+        <code>--goat-techno-background</code> and
+        <code>--goat-techno-text</code>. Links or buttons inside it with
+        <code>slot="controls"</code> join its control bar.
+      </p>
+
+      <h2>Example</h2>
+      <p>The whole frame, a pause button only, and the page's own colours:</p>
+      <div class="snippet">
+        <pre><code>&lt;text-goat fit="contain" controls="pause"
+  style="--goat-background: #f5f5f5; --goat-foreground: #f73928"&gt;
+&lt;/text-goat&gt;</code></pre>
+      </div>
+      <text-goat
+        class="card"
+        fit="contain"
+        controls="pause"
+        label="A goat, running."
+      ></text-goat>
+      <p>
+        It reports changes as events: <code>goat:ready</code>,
+        <code>goat:play</code>, <code>goat:pause</code>, <code>goat:mode</code>,
+        <code>goat:mute</code> and <code>goat:error</code>. The goat at the top
+        last said:
+      </p>
+      <p id="log"><code>waiting…</code></p>
+    </main>
+    <script type="module">
+      // The snippet names this site's own copy of the script, absolutely, so it
+      // works when pasted into a page anywhere else.
+      const snippet = document.querySelector("#snippet");
+      const code = snippet.querySelector("code");
+      const copy = snippet.querySelector(".copy");
+      const script = new URL("text-goat.js", document.baseURI).href;
+      code.textContent = `<script type="module" src="${script}"><\/script>\n<text-goat></text-goat>`;
+
+      if (navigator.clipboard) {
+        let reset;
+        snippet.classList.add("is-copyable");
+        copy.hidden = false;
+        copy.addEventListener("click", async () => {
+          clearTimeout(reset);
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            copy.textContent = "Copied";
+          } catch {
+            getSelection().selectAllChildren(code);
+            copy.textContent = "Selected";
+          }
+          reset = setTimeout(() => (copy.textContent = "Copy"), 2000);
+        });
+      }
+
+      const log = document.querySelector("#log code");
+      for (const type of [
+        "goat:ready",
+        "goat:play",
+        "goat:pause",
+        "goat:mode",
+        "goat:mute",
+        "goat:error",
+      ]) {
+        document.querySelector(".hero").addEventListener(type, (event) => {
+          log.textContent = `${type} ${event.detail ? JSON.stringify(event.detail) : ""}`;
+        });
+      }
+    </script>
+  </body>
+</html>

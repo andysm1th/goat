@@ -1,0 +1,410 @@
+/* Styles for the player's shadow root. Nothing here reaches the host page, and
+   the host page's styles do not reach the glyph grid.
+
+   Custom properties an integrator may set on the host element:
+     --goat-foreground, --goat-background   ink and paper of the animation
+     --goat-accent                          the goat in Techno
+     --goat-techno-background, --goat-techno-text
+     --goat-font-sans, --goat-font-mono     Techno text and control labels */
+:host {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  /* Full width at 16:9 unless the page sizes it. The explicit width matters:
+     with only a height set, an automatic width would follow the ratio instead
+     of the container. */
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+* {
+  box-sizing: border-box;
+}
+
+.stage {
+  /* Inherited properties cross a shadow boundary. Start from initial values so
+     a page's direction, text-indent, text-shadow and the like cannot reach the
+     glyphs. Custom properties are unaffected, so theming still works. */
+  all: initial;
+  /* `all` leaves these two alone, and a right-to-left page reverses every chunk. */
+  direction: ltr;
+  unicode-bidi: isolate;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  background: var(--paper);
+  color: var(--ink);
+  --ink: var(--goat-foreground, #050706);
+  --paper: var(--goat-background, #bdc0bd);
+  --mono: var(
+    --goat-font-mono,
+    ui-monospace,
+    "SF Mono",
+    Menlo,
+    Consolas,
+    monospace
+  );
+  --sans: var(--goat-font-sans, "Helvetica Neue", Helvetica, Arial, sans-serif);
+}
+.stage.is-techno {
+  --ink: var(--goat-accent, #f73928);
+  --paper: var(--goat-techno-background, #0b0b0b);
+}
+/* One phrase in four, Techno trades its colours: black on the accent. */
+.stage.is-techno.is-inverted {
+  --ink: var(--goat-techno-background, #0b0b0b);
+  --paper: var(--goat-accent, #f73928);
+}
+.is-inverted .flow {
+  color: var(--goat-techno-background, #0b0b0b);
+}
+.art {
+  position: absolute;
+}
+
+/* The glyph grid. It is laid out at 12px and scaled as a block (see
+   text-layer.ts), so every length below is in unscaled layout units. */
+.goat-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  transform-origin: 0 0;
+  color: var(--ink);
+  font-weight: 400;
+  font-style: normal;
+  font-variant-ligatures: none;
+  font-kerning: none;
+  letter-spacing: 0;
+  white-space: pre;
+  text-transform: none;
+  /* It is text: it can be selected and copied. */
+  -webkit-font-smoothing: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  contain: strict;
+}
+.goat-text.bleed {
+  contain: layout style;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.text-band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+/* One element per chunk of a row. Its line box is exactly the block glyph's
+   ink height; rows are stretched to twice the cell width by the grid's single
+   transform, not one transform per chunk, because thousands of transformed
+   elements are expensive for the browser to track.
+   No paint containment: glyph ink overhangs its advance by a hair, and clipping
+   it at every chunk boundary draws a faint vertical seam there. */
+.text-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: var(--ink-height);
+  line-height: var(--ink-height);
+  contain: size layout style;
+}
+.text-row.flip {
+  transform: scaleX(-1);
+}
+/* The few rows stretched to a stage edge carry their own vertical scale. */
+.text-row.stretch {
+  transform-origin: 0 0;
+  transform: scaleY(var(--stretch));
+}
+
+.solo,
+.flow {
+  display: none;
+}
+.is-techno .sharp {
+  display: none;
+}
+.is-techno .solo {
+  display: block;
+}
+/* Running text along the film's vertical lines. The box is the stage turned a
+   quarter: its x axis runs down the screen. */
+.is-techno .flow {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  transform-origin: 0 0;
+  color: var(--goat-techno-text, #e6e6e6);
+  font-family: var(--sans);
+  font-weight: 500;
+  font-kerning: none;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+  /* In Techno this is the text that can be selected and copied. */
+  -webkit-user-select: text;
+  user-select: text;
+  contain: strict;
+}
+.is-techno .art {
+  pointer-events: none;
+}
+.is-techno .goat-text {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.flow-column {
+  display: contents;
+}
+.flow-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: pre;
+  contain: layout style;
+}
+/* Alternate lines can be dimmed against each other from the stage. */
+.flow-line.odd {
+  opacity: var(--odd, 1);
+}
+.flow-line.even {
+  opacity: var(--even, 1);
+}
+
+.is-revealing .sharp:not(.bleed) .text-band {
+  animation: assemble 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-play-state: var(--motion-state);
+}
+@keyframes assemble {
+  0% {
+    transform: translate3d(
+        calc((var(--band-index) - 3.5) * 45px),
+        calc((var(--band-index) - 3.5) * -28px),
+        0
+      )
+      skewX(28deg);
+  }
+  30% {
+    transform: translate3d(calc((3.5 - var(--band-index)) * 12px), 0, 0)
+      skewX(-13deg);
+  }
+  65% {
+    transform: translate3d(calc((var(--band-index) - 3.5) * 2px), 0, 0)
+      skewX(2deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #323232;
+  font: 400 14px/1.25 var(--mono);
+  text-align: center;
+}
+.is-techno .message {
+  color: #b5b5b5;
+}
+.message:empty {
+  display: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Controls: small translucent round buttons and an uppercase mono tag. */
+.controls {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.controls[hidden] {
+  display: none;
+}
+button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button:active:not(:disabled),
+.controls ::slotted(:active) {
+  transform: scale(0.94);
+}
+button[hidden] {
+  display: none;
+}
+button:focus-visible,
+.controls ::slotted(:focus-visible) {
+  outline: 2px solid #0b0b0b;
+  outline-offset: 2px;
+}
+.is-techno button:focus-visible,
+.is-techno .controls ::slotted(:focus-visible) {
+  outline-color: #f5f5f5;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.stage[aria-busy="true"] button:disabled {
+  cursor: wait;
+}
+.round {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  color: #fff;
+  background-color: #0b0b0b4d;
+  transition: background-color 0.2s ease-out;
+  /* A ring keeps the button visible where it sits over the black floor. */
+  box-shadow: inset 0 0 0 1px #ffffff59;
+}
+.round svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+.round.sound svg {
+  width: 14px;
+  height: 14px;
+}
+.is-techno .round {
+  color: #0b0b0b;
+  background-color: #e6e6e6;
+  box-shadow: none;
+}
+/* Links or buttons the host page slots in after Techno look like Techno. */
+.tag,
+.controls ::slotted(*) {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #0b0b0b;
+  border-radius: 4px;
+  color: #0b0b0b;
+  background: #f5f5f5;
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.2s ease-out,
+    color 0.2s ease-out;
+}
+.controls ::slotted(*) {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  margin: 0;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* On: inverted, so it reads on the red ground as well as on black. */
+.tag[aria-pressed="true"] {
+  color: #f5f5f5;
+  background: #0b0b0b;
+  border-color: #f5f5f5;
+}
+@media (hover: hover) {
+  .round:hover {
+    background-color: #0b0b0b66;
+  }
+  .is-techno .round:hover {
+    background-color: #cfcfcf;
+  }
+  .tag:hover,
+  .controls ::slotted(:hover) {
+    color: #f5f5f5;
+    background: #0b0b0b;
+  }
+  .tag[aria-pressed="true"]:hover {
+    color: #0b0b0b;
+    background: #f5f5f5;
+  }
+}
+/* Touch: comfortable 44px targets with room between them. */
+@media (pointer: coarse) {
+  .controls {
+    gap: 12px;
+  }
+  .round {
+    width: 44px;
+    height: 44px;
+  }
+  .round svg {
+    width: 14px;
+    height: 14px;
+  }
+  .round.sound svg {
+    width: 18px;
+    height: 18px;
+  }
+  .tag,
+  .controls ::slotted(*) {
+    height: 44px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+}
+/* Narrow: the goat is centred, so the controls are too, clear of the home
+   indicator and within reach of either thumb. */
+@media (max-width: 600px) {
+  .controls {
+    left: 0;
+    right: 0;
+    /* Wraps rather than running off screen when the page adds controls. */
+    flex-wrap: wrap;
+    padding: 0 16px;
+    justify-content: center;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-revealing .sharp .text-band {
+    animation: none;
+  }
+  .round,
+  .tag,
+  .controls ::slotted(*) {
+    transition: none;
+  }
+  button:active:not(:disabled),
+  .controls ::slotted(:active) {
+    transform: none;
+  }
+}

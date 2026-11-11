@@ -1,0 +1,14 @@
+/* The demo page: one goat filling the window. */
+:root {
+  color-scheme: light;
+  background: #bdc0bd;
+}
+body {
+  margin: 0;
+  min-width: 280px;
+}
+.goat {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
